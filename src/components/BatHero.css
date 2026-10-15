@@ -1,0 +1,346 @@
+/* ==========================================================================
+   Cinematic hero
+   Layer order (back → front):
+     atmos → rim → blackout → wordmark → pool → character → grain → vignette → copy
+   The `pool` sits *above* the wordmark on purpose: it darkens the centre of
+   BATMAN so the figure has a black backing to composite against, and the type
+   survives only around the edges — the look of the reference art.
+   ========================================================================== */
+
+.bat-hero {
+  position: relative;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--ink-1000);
+}
+
+/* ---------- atmosphere ---------- */
+.bat-hero__atmos {
+  position: absolute;
+  inset: -12%;
+  z-index: 1;
+  opacity: 0.5;
+  will-change: transform, opacity;
+  background:
+    /* dark pool on top of the crimson, so the matte always has black behind it */
+    radial-gradient(
+      56% 50% at 50% 56%,
+      #050507 0%,
+      rgba(5, 5, 7, 0.93) 44%,
+      rgba(5, 5, 7, 0.5) 64%,
+      transparent 80%
+    ),
+    /* crimson body */
+      radial-gradient(
+        74% 66% at 50% 42%,
+        #e3202c 0%,
+        #a60e18 30%,
+        #52060d 57%,
+        rgba(20, 1, 4, 0) 84%
+      );
+}
+
+/* sweeping red key light */
+.bat-hero__rim {
+  position: absolute;
+  inset: -20% -32%;
+  z-index: 2;
+  opacity: 0;
+  filter: blur(38px);
+  mix-blend-mode: screen;
+  will-change: transform, opacity;
+  background: linear-gradient(
+    104deg,
+    transparent 36%,
+    rgba(227, 32, 44, 0.42) 46%,
+    rgba(255, 96, 84, 0.68) 51%,
+    rgba(227, 32, 44, 0.34) 57%,
+    transparent 68%
+  );
+}
+
+/* drains the red away at the end of the sequence */
+.bat-hero__blackout {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  opacity: 0;
+  background: radial-gradient(85% 80% at 50% 45%, #050507 0%, #020203 60%, #000 100%);
+}
+
+/* ---------- oversized wordmark ---------- */
+.bat-hero__word {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 4;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(6rem, 23vw, 21rem);
+  line-height: 0.76;
+  letter-spacing: 0.015em;
+  white-space: nowrap;
+  user-select: none;
+  will-change: transform, opacity;
+  background: linear-gradient(180deg, #8c0e19 0%, #46060c 52%, #1c0205 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(255, 86, 74, 0.09);
+}
+
+/* keeps a black backing under the figure no matter how bright the atmos gets */
+.bat-hero__pool {
+  position: absolute;
+  left: 50%;
+  top: 54%;
+  z-index: 5;
+  width: min(135vh, 1600px);
+  aspect-ratio: 1.18;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  background: radial-gradient(
+    50% 50% at 50% 50%,
+    #050507 0%,
+    rgba(5, 5, 7, 0.92) 40%,
+    rgba(5, 5, 7, 0.55) 62%,
+    transparent 79%
+  );
+}
+
+/* ---------- character ---------- */
+.bat-hero__stage {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  perspective: 1500px;
+  perspective-origin: 50% 46%;
+  pointer-events: none;
+}
+
+.bat-hero__char {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: min(94vw, 1080px);
+  height: min(82vh, 840px);
+  height: min(82svh, 840px);
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  will-change: transform;
+}
+
+.bat-hero__view {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  /* lifts the figure off the plate and ties it to the crimson key */
+  filter: drop-shadow(0 28px 60px rgba(0, 0, 0, 0.75));
+}
+
+.bat-hero__view--bust,
+.bat-hero__view--turn {
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* the turn plate is a vignetted frame rather than a cut-out, so centre it */
+.bat-hero__view--turn {
+  bottom: auto;
+  top: 50%;
+  transform: translate(-50%, -49%);
+  max-height: 106%;
+  filter: none;
+}
+
+/* ---------- grade ---------- */
+.bat-hero__grain {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  pointer-events: none;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.bat-hero__vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  pointer-events: none;
+  background:
+    radial-gradient(118% 92% at 50% 42%, transparent 48%, rgba(0, 0, 0, 0.72) 100%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.55) 0%, transparent 22%, transparent 72%, rgba(0, 0, 0, 0.82) 100%);
+}
+
+/* ---------- copy ---------- */
+.bat-hero__copy {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.bat-hero__intro {
+  position: absolute;
+  left: 0;
+  bottom: 14vh;
+  padding-inline: var(--gutter);
+}
+
+.bat-hero__name {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 3.4vw, 2.6rem);
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.8);
+}
+
+.bat-hero__role {
+  margin-top: 10px;
+  padding-left: 34px;
+  position: relative;
+  font-family: var(--font-mono);
+  font-size: clamp(0.66rem, 1.5vw, 0.76rem);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.bat-hero__role::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.62em;
+  width: 24px;
+  height: 1px;
+  background: var(--red);
+}
+
+.bat-hero__reveal {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: min(100%, 680px);
+  padding-inline: var(--gutter);
+}
+
+.bat-hero__headline {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(2.3rem, 5.6vw, 4.4rem);
+  line-height: 0.94;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  text-wrap: balance;
+  text-shadow: 0 4px 40px rgba(0, 0, 0, 0.9);
+}
+
+.bat-hero__desc {
+  margin-top: 22px;
+  max-width: 48ch;
+  color: var(--text-dim);
+  font-size: clamp(0.95rem, 1.7vw, 1.06rem);
+}
+
+.bat-hero__actions {
+  margin-top: 34px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+/* ---------- scroll cue ---------- */
+.bat-hero__cue {
+  position: absolute;
+  left: 50%;
+  bottom: 28px;
+  z-index: 10;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+.bat-hero__cue i {
+  display: block;
+  width: 1px;
+  height: 46px;
+  background: linear-gradient(180deg, var(--red), transparent);
+  animation: bat-cue 2.1s var(--ease-in-out) infinite;
+  transform-origin: top;
+}
+@keyframes bat-cue {
+  0% {
+    transform: scaleY(0.25);
+    opacity: 0.35;
+  }
+  45% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scaleY(0.25);
+    opacity: 0.35;
+  }
+}
+
+/* ---------- mobile ---------- */
+@media (max-width: 860px) {
+  .bat-hero__char {
+    width: 100vw;
+    height: min(62svh, 560px);
+  }
+  .bat-hero__intro {
+    bottom: 17vh;
+  }
+  .bat-hero__reveal {
+    top: auto;
+    bottom: 11vh;
+    transform: none;
+    width: 100%;
+  }
+  .bat-hero__pool {
+    width: 150vw;
+  }
+  .bat-hero__vignette {
+    background:
+      radial-gradient(130% 80% at 50% 38%, transparent 42%, rgba(0, 0, 0, 0.78) 100%),
+      linear-gradient(180deg, rgba(0, 0, 0, 0.6) 0%, transparent 20%, transparent 58%, rgba(0, 0, 0, 0.92) 100%);
+  }
+}
+
+/* Short landscape phones: pull the figure down so copy has room. */
+@media (max-height: 560px) and (orientation: landscape) {
+  .bat-hero__char {
+    height: 92svh;
+  }
+  .bat-hero__intro {
+    bottom: 8vh;
+  }
+  .bat-hero__cue {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bat-hero__cue i {
+    animation: none;
+  }
+}

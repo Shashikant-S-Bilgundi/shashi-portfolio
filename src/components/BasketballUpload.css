@@ -1,0 +1,245 @@
+/* ---------- tokens ---------- */
+.bbu {
+  --bbu-base: #16171a;
+  --bbu-base-2: #212226;
+  --bbu-text: #f3f3f1;
+  --bbu-muted: rgba(243, 243, 241, 0.64);
+  --bbu-glass: rgba(255, 255, 255, 0.08);
+  --bbu-glass-strong: rgba(255, 255, 255, 0.12);
+  --bbu-edge: rgba(255, 255, 255, 0.18);
+  --bbu-edge-strong: rgba(255, 255, 255, 0.42);
+  --bbu-rim: #d9d7d2;
+  --bbu-ok: #e4ebe5;
+  --bbu-err: #e9bdb7;
+  --bbu-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  position: relative;
+  isolation: isolate;
+  width: min(100%, 400px);
+  margin: 0 auto;
+  padding: 10px;
+  border-radius: 28px;
+  overflow: hidden;
+  background: linear-gradient(160deg, var(--bbu-base-2), var(--bbu-base));
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(0, 0, 0, 0.2);
+  color: var(--bbu-text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.bbu *,
+.bbu *::before,
+.bbu *::after { box-sizing: border-box; }
+
+/* soft neutral light the glass can frost */
+.bbu__light { position: absolute; border-radius: 50%; z-index: -1; pointer-events: none; filter: blur(10px); }
+.bbu__light--a { width: 260px; height: 260px; left: -90px; top: -70px; background: rgba(255, 255, 255, 0.07); }
+.bbu__light--b { width: 220px; height: 220px; right: -80px; bottom: 40px; background: rgba(255, 255, 255, 0.045); }
+
+/* ---------- glass court ---------- */
+.bbu__stage {
+  position: relative;
+  height: 460px;
+  border-radius: 20px;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.035));
+  -webkit-backdrop-filter: blur(20px) saturate(115%);
+  backdrop-filter: blur(20px) saturate(115%);
+  border: 1px solid var(--bbu-edge);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 12px 32px rgba(0, 0, 0, 0.28);
+  transition: border-color 0.25s var(--bbu-ease), box-shadow 0.25s var(--bbu-ease);
+}
+.bbu--idle .bbu__stage { cursor: pointer; }
+.bbu--filedrag .bbu__stage {
+  border-color: var(--bbu-edge-strong);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22), inset 0 0 48px rgba(255, 255, 255, 0.06),
+    0 12px 32px rgba(0, 0, 0, 0.28);
+}
+
+/* floor: frosted planks */
+.bbu__floor {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 120px;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 46px, rgba(255, 255, 255, 0.045) 46px 47px),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.015));
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+.bbu__floor::after {
+  content: ""; position: absolute; left: 50%; top: -1px; width: 170px; height: 64px;
+  transform: translateX(-50%);
+  border: 1px solid rgba(255, 255, 255, 0.14); border-top: 0;
+  border-radius: 0 0 170px 170px;
+}
+
+/* ---------- hoop: back layer (board, back rim) and front layer (net, front rim) ---------- */
+.bbu__hoop { position: absolute; top: 26px; left: 50%; width: 220px; height: 210px; transform: translateX(-50%); pointer-events: none; }
+.bbu__hoop--back { z-index: 1; }
+.bbu__hoop--front { z-index: 4; color: rgba(255, 255, 255, 0.62); }
+
+.bbu__board {
+  position: absolute; top: 0; left: 50%; width: 156px; height: 96px; transform: translateX(-50%);
+  background: rgba(255, 255, 255, 0.07);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 6px 18px rgba(0, 0, 0, 0.25);
+  transition: border-color 0.25s var(--bbu-ease), background-color 0.25s var(--bbu-ease);
+}
+.bbu__board::after {
+  content: ""; position: absolute; left: 50%; bottom: 8px; width: 56px; height: 36px; transform: translateX(-50%);
+  border: 1.5px solid rgba(255, 255, 255, 0.38); border-radius: 3px;
+}
+.bbu__rim-back {
+  position: absolute; top: 96px; left: 50%; width: 112px; height: 22px; transform: translateX(-50%);
+  border: 3px solid rgba(217, 215, 210, 0.5); border-bottom-color: transparent; border-radius: 50%;
+}
+.bbu__net { position: absolute; top: 106px; left: 50%; width: 112px; height: 90px; transform: translateX(-50%); transform-origin: top center; }
+.bbu__rim-front {
+  position: absolute; top: 96px; left: 50%; width: 112px; height: 22px; transform: translateX(-50%);
+  border: 3px solid var(--bbu-rim); border-top-color: transparent; border-radius: 50%;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.35));
+  transition: border-color 0.25s var(--bbu-ease), filter 0.25s var(--bbu-ease);
+}
+
+/* restrained highlight when the aim lines up, and on a make */
+.bbu--aim-on .bbu__rim-front,
+.bbu--scored .bbu__rim-front {
+  border-color: #fff; border-top-color: transparent;
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.4)) drop-shadow(0 2px 2px rgba(0, 0, 0, 0.35));
+}
+.bbu--aim-on .bbu__board,
+.bbu--scored .bbu__board { border-color: rgba(255, 255, 255, 0.5); background-color: rgba(255, 255, 255, 0.1); }
+
+.bbu--swish .bbu__net { animation: bbu-swish 0.9s ease-out; }
+@keyframes bbu-swish {
+  0%   { transform: translateX(-50%) scale(1, 1); }
+  18%  { transform: translateX(-50%) scale(0.92, 1.18); }
+  40%  { transform: translateX(-50%) scale(1.04, 0.92); }
+  62%  { transform: translateX(-50%) scale(0.98, 1.05); }
+  100% { transform: translateX(-50%) scale(1, 1); }
+}
+
+/* ---------- aiming guide ---------- */
+.bbu__aim { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; overflow: visible; }
+.bbu__aim-band { stroke: rgba(255, 255, 255, 0.32); stroke-width: 1.5; stroke-dasharray: 3 4; stroke-linecap: round; }
+.bbu__aim-arc {
+  fill: none; stroke: rgba(255, 255, 255, 0.38); stroke-width: 3.5;
+  stroke-linecap: round; stroke-dasharray: 0 10;
+  transition: stroke 0.2s var(--bbu-ease);
+}
+.bbu--aim-on .bbu__aim-arc { stroke: rgba(255, 255, 255, 0.88); }
+.bbu--aim-invalid .bbu__aim-band { stroke: rgba(255, 255, 255, 0.16); }
+
+/* ---------- ball (positioned from JS) ---------- */
+.bbu__ball-shadow {
+  position: absolute; left: 0; top: 334px; width: 48px; height: 12px; border-radius: 50%;
+  background: rgba(0, 0, 0, 0.5); filter: blur(3px);
+  pointer-events: none; z-index: 1;
+}
+.bbu__ball-btn {
+  position: absolute; left: 0; top: 0; width: 64px; height: 64px;
+  padding: 0; border: 0; background: none; border-radius: 50%;
+  cursor: grab; touch-action: none; z-index: 5;
+  will-change: transform;
+  -webkit-tap-highlight-color: transparent;
+}
+.bbu__ball-btn.is-behind { z-index: 3; } /* dropping through: behind the front rim and net */
+.bbu--held .bbu__ball-btn { cursor: grabbing; z-index: 8; }
+.bbu__ball-btn[disabled] { cursor: default; }
+.bbu__ball-btn:focus-visible { outline: 2px solid rgba(255, 255, 255, 0.85); outline-offset: 4px; }
+
+.bbu__ball-y,
+.bbu__spin { width: 100%; height: 100%; border-radius: 50%; }
+.bbu__ball { display: block; width: 100%; height: 100%; transition: transform 0.2s var(--bbu-ease); }
+.bbu__ball-btn:not([disabled]):hover .bbu__ball { transform: scale(1.05); }
+.bbu--held .bbu__ball,
+.bbu__ball-btn:not([disabled]):active .bbu__ball { transform: scale(0.96); }
+
+.bbu--idle:not(.bbu--held):not(.bbu--moving):not(.bbu--aiming) .bbu__ball-btn:not(:active) .bbu__ball-y {
+  animation: bbu-bob 2.6s ease-in-out infinite;
+}
+.bbu--ready:not(.bbu--held):not(.bbu--moving):not(.bbu--aiming) .bbu__ball-btn:not(:active) .bbu__ball-y {
+  animation: bbu-bob 1.8s ease-in-out infinite, bbu-pulse 1.8s ease-in-out infinite;
+}
+.bbu--filedrag .bbu__ball-y { animation: bbu-lift 0.6s ease-in-out infinite; }
+@keyframes bbu-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+@keyframes bbu-lift { 0%, 100% { transform: translateY(-10px) rotate(-5deg); } 50% { transform: translateY(-16px) rotate(5deg); } }
+@keyframes bbu-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.28); }
+  50% { box-shadow: 0 0 0 10px rgba(255, 255, 255, 0); }
+}
+
+/* ---------- copy + glass card ---------- */
+.bbu__copy { position: absolute; left: 0; right: 0; bottom: 22px; text-align: center; padding: 0 20px; z-index: 6; pointer-events: none; }
+.bbu__title { margin: 0; font-size: 1rem; font-weight: 600; letter-spacing: -0.005em; }
+.bbu__hint { margin: 4px 0 0; font-size: 0.85rem; color: var(--bbu-muted); }
+
+.bbu__card {
+  position: absolute; left: 14px; right: 14px; bottom: 14px; z-index: 6;
+  padding: 12px 14px; border-radius: 14px;
+  background: var(--bbu-glass-strong);
+  -webkit-backdrop-filter: blur(18px) saturate(115%);
+  backdrop-filter: blur(18px) saturate(115%);
+  border: 1px solid var(--bbu-edge);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 8px 24px rgba(0, 0, 0, 0.25);
+  animation: bbu-rise 0.35s var(--bbu-ease);
+}
+@keyframes bbu-rise { from { transform: translateY(12px); opacity: 0; } to { transform: none; opacity: 1; } }
+.bbu__file { display: flex; justify-content: space-between; gap: 12px; font-size: 0.9rem; }
+.bbu__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.bbu__size { color: var(--bbu-muted); flex: none; font-variant-numeric: tabular-nums; }
+
+.bbu__bar { position: relative; height: 4px; margin-top: 10px; border-radius: 99px; background: rgba(255, 255, 255, 0.12); overflow: hidden; }
+.bbu__bar > span { display: block; height: 100%; background: rgba(255, 255, 255, 0.82); border-radius: inherit; transition: width 0.25s linear; }
+.bbu__bar--busy > span { width: 32% !important; animation: bbu-busy 1.1s ease-in-out infinite; }
+@keyframes bbu-busy { from { transform: translateX(-100%); } to { transform: translateX(320%); } }
+.bbu--done .bbu__bar > span { background: var(--bbu-ok); }
+
+.bbu__status {
+  margin: 10px 0 0; font-size: 0.85rem; color: var(--bbu-muted);
+  display: flex; justify-content: space-between; align-items: center; gap: 8px; min-height: 28px;
+}
+.bbu--done .bbu__status { color: var(--bbu-ok); }
+.bbu--error .bbu__status { color: var(--bbu-err); }
+.bbu__actions { display: flex; gap: 6px; flex: none; }
+
+.bbu__btn {
+  font: inherit; font-size: 0.8rem; color: var(--bbu-text); cursor: pointer;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.22); border-radius: 9px; padding: 5px 11px;
+  transition: background-color 0.2s var(--bbu-ease), transform 0.15s var(--bbu-ease);
+}
+.bbu__btn:hover { background: rgba(255, 255, 255, 0.16); }
+.bbu__btn:active { transform: scale(0.97); }
+.bbu__btn--primary { background: #ecebe8; border-color: transparent; color: #18191b; font-weight: 600; }
+.bbu__btn--primary:hover { background: #ffffff; }
+.bbu__btn:focus-visible { outline: 2px solid rgba(255, 255, 255, 0.85); outline-offset: 2px; }
+
+.bbu__sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ---------- responsive ---------- */
+@media (max-width: 380px) {
+  .bbu { padding: 8px; border-radius: 24px; }
+  .bbu__card { left: 10px; right: 10px; bottom: 10px; padding: 10px 12px; }
+  .bbu__status { flex-wrap: wrap; }
+}
+@media (max-height: 560px) {
+  .bbu__stage { height: 420px; }
+}
+
+/* browsers without backdrop-filter: keep it readable */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .bbu__stage { background: rgba(40, 41, 45, 0.94); }
+  .bbu__card { background: rgba(30, 31, 34, 0.97); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bbu *, .bbu *::before, .bbu *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
