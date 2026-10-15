@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { ScrollTrigger } from "./lib/motion";
+import SiteBackdrop from "./components/backdrop/SiteBackdrop";
 import SiteNav from "./components/SiteNav";
 import BatHero from "./components/BatHero";
 import Projects from "./components/Projects";
@@ -29,6 +30,8 @@ export default function App() {
 
   return (
     <>
+      <SiteBackdrop />
+
       <a className="sx-skip" href="#about">
         Skip to content
       </a>

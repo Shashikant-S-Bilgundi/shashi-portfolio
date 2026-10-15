@@ -5,9 +5,10 @@
 main {
   display: block;
   position: relative;
-  /* Sections below the pinned hero sit on solid black so the hero's crimson
-     never bleeds past the pin release. */
-  background: var(--ink-1000);
+  /* Transparent so the shared fixed backdrop (SiteBackdrop) reads through
+     every section. The hero paints its own opaque stage, so its crimson still
+     never bleeds past the pin release. No transform/filter here: either would
+     become the containing block for the pinned hero and break the pin. */
 }
 
 /* ---------- buttons ---------- */

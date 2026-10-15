@@ -1,4 +1,5 @@
 import { useReveal } from "../lib/motion";
+import { useSectionMotion, workMotion } from "../lib/sectionMotion";
 import { featuredDemo, projects } from "../content/portfolio";
 import BasketballUpload from "./BasketballUpload";
 import "./Projects.css";
@@ -14,6 +15,7 @@ import "./Projects.css";
  */
 export default function Projects() {
   const ref = useReveal<HTMLElement>();
+  useSectionMotion(ref, workMotion);
 
   return (
     <section ref={ref} id="work" className="sx-section">
@@ -22,13 +24,13 @@ export default function Projects() {
           <p className="sx-eyebrow" data-reveal>
             Case files
           </p>
-          <h2 className="sx-h2" data-reveal>
+          <h2 className="sx-h2" data-unmask>
             Selected work
           </h2>
         </header>
 
         {/* ---------- live demo ---------- */}
-        <div className="pj-demo" data-reveal>
+        <div className="pj-demo glass glass--strong" data-reveal>
           <div className="pj-demo__copy">
             <p className="pj-demo__eyebrow">{featuredDemo.eyebrow}</p>
             <h3 className="pj-demo__title">{featuredDemo.name}</h3>
@@ -52,7 +54,7 @@ export default function Projects() {
         {/* ---------- project grid ---------- */}
         <ul className="pj-grid">
           {projects.map((p) => (
-            <li key={p.name} className="pj-card" data-reveal>
+            <li key={p.name} className="pj-card glass">
               <div className="pj-card__top">
                 <h3 className="pj-card__name">{p.name}</h3>
                 <p className="pj-card__tagline">{p.tagline}</p>

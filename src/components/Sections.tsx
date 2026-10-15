@@ -1,8 +1,8 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { useReveal } from "../lib/motion";
+import { aboutMotion, experienceMotion, skillsMotion, useSectionMotion } from "../lib/sectionMotion";
 import { about, contact, experience, profile, skills } from "../content/portfolio";
-import gothamBand from "../assets/batman/gotham-band.webp";
 import "./Sections.css";
 
 /* -------------------------------------------------------------------------- */
@@ -11,6 +11,7 @@ import "./Sections.css";
 
 export function About() {
   const ref = useReveal<HTMLElement>();
+  useSectionMotion(ref, aboutMotion);
 
   return (
     <section ref={ref} id="about" className="sx-section sx-section--about">
@@ -19,19 +20,26 @@ export function About() {
           <p className="sx-eyebrow" data-reveal>
             {about.eyebrow}
           </p>
-          <h2 className="sx-h2" data-reveal>
+          <h2 className="sx-h2" data-unmask>
             {about.heading}
           </h2>
         </header>
 
         <div className="sx-about__body">
-          {about.paragraphs.map((p, i) => (
-            <p key={i} className="sx-lede" data-reveal>
-              {p}
-            </p>
-          ))}
+          <div className="sx-about__story glass" data-reveal>
+            {about.paragraphs.map((p, i) => (
+              <p key={i} className="sx-lede">
+                {/* word spans let the scroll effect resolve the text as you read */}
+                {p.split(" ").map((word, j) => (
+                  <span key={j} className="w">
+                    {word}{" "}
+                  </span>
+                ))}
+              </p>
+            ))}
+          </div>
 
-          <ul className="sx-about__stats" data-reveal>
+          <ul className="sx-about__stats glass" data-reveal>
             {about.stats.map((s) => (
               <li key={s.label}>
                 <span className="sx-about__stat-value">{s.value}</span>
@@ -51,6 +59,7 @@ export function About() {
 
 export function Skills() {
   const ref = useReveal<HTMLElement>();
+  useSectionMotion(ref, skillsMotion);
 
   return (
     <section ref={ref} id="skills" className="sx-section">
@@ -59,14 +68,14 @@ export function Skills() {
           <p className="sx-eyebrow" data-reveal>
             The arsenal
           </p>
-          <h2 className="sx-h2" data-reveal>
+          <h2 className="sx-h2" data-unmask>
             Tools of the trade
           </h2>
         </header>
 
         <ul className="sx-skills">
           {skills.map((group) => (
-            <li key={group.title} className="sx-skill" data-reveal>
+            <li key={group.title} className="sx-skill glass" data-reveal>
               <h3 className="sx-skill__title">{group.title}</h3>
               <ul className="sx-skill__items">
                 {group.items.map((item) => (
@@ -87,6 +96,7 @@ export function Skills() {
 
 export function Experience() {
   const ref = useReveal<HTMLElement>();
+  useSectionMotion(ref, experienceMotion);
 
   return (
     <section ref={ref} id="experience" className="sx-section">
@@ -95,14 +105,14 @@ export function Experience() {
           <p className="sx-eyebrow" data-reveal>
             Track record
           </p>
-          <h2 className="sx-h2" data-reveal>
+          <h2 className="sx-h2" data-unmask>
             Experience
           </h2>
         </header>
 
         <ol className="sx-timeline">
           {experience.map((role) => (
-            <li key={`${role.company}-${role.title}`} className="sx-role" data-reveal>
+            <li key={`${role.company}-${role.title}`} className="sx-role glass">
               <div className="sx-role__meta">
                 <p className="sx-role__period">{role.period}</p>
                 <p className="sx-role__location">{role.location}</p>
@@ -173,10 +183,6 @@ export function Contact() {
 
   return (
     <section ref={ref} id="contact" className="sx-section sx-contact">
-      <div className="sx-contact__plate" aria-hidden="true">
-        <img src={gothamBand} alt="" width={1600} height={675} loading="lazy" decoding="async" />
-      </div>
-
       <div className="sx-shell sx-contact__grid">
         <div className="sx-contact__intro">
           <p className="sx-eyebrow" data-reveal>
@@ -189,7 +195,7 @@ export function Contact() {
             {contact.blurb}
           </p>
 
-          <ul className="sx-contact__direct" data-reveal>
+          <ul className="sx-contact__direct glass" data-reveal>
             {contact.email && (
               <li>
                 <span>Email</span>
@@ -221,7 +227,7 @@ export function Contact() {
           )}
         </div>
 
-        <form className="sx-form" onSubmit={onSubmit} noValidate data-reveal>
+        <form className="sx-form glass glass--strong" onSubmit={onSubmit} noValidate data-reveal>
           <div className="sx-field">
             <label htmlFor="cf-name">Name</label>
             <input
