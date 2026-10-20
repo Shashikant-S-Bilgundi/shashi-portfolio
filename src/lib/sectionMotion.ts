@@ -1,32 +1,35 @@
+// File: src/lib/sectionMotion.ts
 import { useLayoutEffect } from "react";
 import type { RefObject } from "react";
 import { MQ, gsap } from "./motion";
 
 /*
- * Scroll-scrubbed effects for the sections below the hero.
+ * The scroll-driven motion language for every section below the hero.
  *
- * Every effect is tied to scroll position (scrub), so scrolling back up plays
- * it in reverse. Under reduced motion nothing is built at all: the stylesheet
- * defines each effect's END state as the default (fully lit, fully drawn,
- * nothing clipped), so the page simply shows that.
+ * One vocabulary, used everywhere:
+ *   • depth     panels arrive from behind the page: scaled down and tipped
+ *               back, settling flat as they reach reading position
+ *   • unmask    section titles wipe up from behind a mask
+ *   • stagger   lists and chips light up in reading order
+ *   • recede    each section zooms out slightly as it leaves the top
  *
- * Rule that keeps these from fighting `useReveal`: its tween uses
- * `overwrite: true`, which kills ANY tween on the elements it reveals. So the
- * effects here never target a `[data-reveal]` element. They either animate
- * children of revealed elements, or own elements that no longer carry
- * `data-reveal` (headings marked `data-unmask`, project cards, roles).
+ * Everything is scrubbed to scroll position, so scrolling up plays it in
+ * reverse. Under reduced motion nothing is built: the stylesheet's default
+ * state is each effect's end state (fully lit, flat, unclipped).
+ *
+ * Two rules keep this compatible with the glass panels:
+ *   1. Never animate opacity, filter or clip-path on an ANCESTOR of a
+ *      `.glass` element. Those make the ancestor a "backdrop root", and the
+ *      panel would stop blurring the 3D scene behind the page. Transforms are
+ *      safe. A panel's own opacity is safe.
+ *   2. Never target a `[data-reveal]` element here (useReveal owns those).
  */
 
 type Build = (root: HTMLElement, opts: { mobile: boolean }) => void;
 
 const scrub = 0.6;
 
-/**
- * Runs a section's effect inside gsap.matchMedia, scoped to the section, so it
- * rebuilds across the mobile breakpoint and tears down completely on unmount
- * (StrictMode's double mount included).
- */
-export function useSectionMotion(ref: RefObject<HTMLElement | null>, build: Build) {
+export function useSectionMotion(ref: RefObject<HTMLElement | null>, build?: Build) {
   useLayoutEffect(() => {
     const root = ref.current;
     if (!root) return;
@@ -35,36 +38,85 @@ export function useSectionMotion(ref: RefObject<HTMLElement | null>, build: Buil
     mm.add({ motion: MQ.motion, mobile: MQ.mobile }, (ctx) => {
       const { motion, mobile } = ctx.conditions as { motion: boolean; mobile: boolean };
       if (!motion) return;
-      unmaskHeadings(root);
-      build(root, { mobile });
+      shared(root, mobile);
+      build?.(root, { mobile });
     });
 
     return () => mm.revert();
   }, [ref, build]);
 }
 
-/* Shared motif: section titles wipe up from behind a mask as they enter. */
-function unmaskHeadings(root: HTMLElement) {
+function shared(root: HTMLElement, mobile: boolean) {
   gsap.utils.toArray<HTMLElement>("[data-unmask]", root).forEach((el) => {
     gsap.fromTo(
       el,
-      { clipPath: "inset(-12% -4% 100% -4%)", y: 30 },
+      { clipPath: "inset(-12% -4% 100% -4%)", y: 40 },
       {
         clipPath: "inset(-12% -4% -12% -4%)",
         y: 0,
         ease: "power1.out",
-        scrollTrigger: { trigger: el, start: "top 92%", end: "top 62%", scrub },
+        scrollTrigger: { trigger: el, start: "top 94%", end: "top 64%", scrub },
       },
     );
   });
+
+  gsap.utils.toArray<HTMLElement>("[data-depth]", root).forEach((el) => {
+    gsap.fromTo(
+      el,
+      {
+        scale: mobile ? 0.95 : 0.9,
+        rotateX: mobile ? 6 : 12,
+        y: mobile ? 40 : 80,
+        transformPerspective: 1200,
+        transformOrigin: "50% 0%",
+      },
+      {
+        scale: 1,
+        rotateX: 0,
+        y: 0,
+        ease: "power2.out",
+        scrollTrigger: { trigger: el, start: "top 98%", end: "top 55%", scrub },
+      },
+    );
+  });
+
+  gsap.utils.toArray<HTMLElement>("[data-stagger]", root).forEach((list) => {
+    const items = Array.from(list.children) as HTMLElement[];
+    if (!items.length) return;
+    gsap.fromTo(
+      items,
+      { opacity: 0.15, y: 14 },
+      {
+        opacity: 1,
+        y: 0,
+        stagger: 0.06,
+        ease: "none",
+        scrollTrigger: { trigger: list, start: "top 94%", end: "top 66%", scrub },
+      },
+    );
+  });
+
+  const frame = root.querySelector<HTMLElement>(":scope > .section__frame");
+  if (frame && root.dataset.recede !== "off") {
+    gsap.fromTo(
+      frame,
+      { scale: 1, transformOrigin: "50% 100%" },
+      {
+        scale: mobile ? 0.975 : 0.95,
+        ease: "none",
+        immediateRender: false,
+        scrollTrigger: { trigger: root, start: "bottom 35%", end: "bottom top", scrub },
+      },
+    );
+  }
 }
 
-/* Who's behind the mask: the story resolves word by word as you read down it,
-   then the three stat cells light their crimson edge one after another. */
+/* About: the statement resolves word by word as you read it; the focus list
+   follows in reading order. */
 export const aboutMotion: Build = (root) => {
-  const story = root.querySelector<HTMLElement>(".sx-about__story");
-  const words = gsap.utils.toArray<HTMLElement>(".sx-about__story .w", root);
-  if (story && words.length) {
+  const statement = root.querySelector<HTMLElement>(".ab-statement");
+  const words = gsap.utils.toArray<HTMLElement>(".ab-statement .w", root);
+  if (statement && words.length) {
     gsap.fromTo(
       words,
       { opacity: 0.16 },
@@ -72,94 +124,175 @@ export const aboutMotion: Build = (root) => {
         opacity: 1,
         ease: "none",
         stagger: 0.05,
-        // lines resolve as they reach the lower quarter of the screen, so
-        // everything you can comfortably read is already lit
-        scrollTrigger: { trigger: story, start: "top 85%", end: "bottom 78%", scrub },
+        scrollTrigger: { trigger: statement, start: "top 82%", end: "bottom 52%", scrub },
       },
     );
   }
 
-  const stats = root.querySelector<HTMLElement>(".sx-about__stats");
-  const cells = gsap.utils.toArray<HTMLElement>(".sx-about__stats li", root);
-  if (stats && cells.length) {
+  gsap.utils.toArray<HTMLElement>(".ab-body p", root).forEach((p) => {
     gsap.fromTo(
-      cells,
-      { "--lit": 0 },
-      {
-        "--lit": 1,
-        ease: "none",
-        stagger: 0.35,
-        scrollTrigger: { trigger: stats, start: "top 88%", end: "top 58%", scrub },
-      },
-    );
-  }
-};
-
-/* The arsenal: every item "arms" in reading order, card by card, as the grid
-   scrolls through: its marker extends and turns crimson, the label brightens. */
-export const skillsMotion: Build = (root) => {
-  const grid = root.querySelector<HTMLElement>(".sx-skills");
-  const items = gsap.utils.toArray<HTMLElement>(".sx-skill__items li", root);
-  if (!grid || !items.length) return;
-
-  gsap.fromTo(
-    items,
-    { "--armed": 0 },
-    {
-      "--armed": 1,
-      ease: "none",
-      stagger: 0.12,
-      scrollTrigger: { trigger: grid, start: "top 82%", end: "bottom 78%", scrub },
-    },
-  );
-};
-
-/* Case files: each project card lands like a file dropped on a desk, settling
-   from a slight alternating tilt. */
-export const workMotion: Build = (root, { mobile }) => {
-  gsap.utils.toArray<HTMLElement>(".pj-card", root).forEach((card, i) => {
-    const tilt = (i % 2 ? 1 : -1) * (mobile ? 1.5 : 3);
-    gsap.fromTo(
-      card,
-      { y: mobile ? 48 : 72, rotate: tilt, opacity: 0.12 },
-      {
-        y: 0,
-        rotate: 0,
-        opacity: 1,
-        ease: "power2.out",
-        scrollTrigger: { trigger: card, start: "top 98%", end: "top 68%", scrub },
-      },
+      p,
+      { opacity: 0.2, y: 28 },
+      { opacity: 1, y: 0, ease: "power1.out", scrollTrigger: { trigger: p, start: "top 94%", end: "top 70%", scrub } },
     );
   });
+
+  const focus = gsap.utils.toArray<HTMLElement>(".ab-focus li", root);
+  if (focus.length) {
+    gsap.fromTo(
+      focus,
+      { opacity: 0, x: -26 },
+      {
+        opacity: 1,
+        x: 0,
+        stagger: 0.1,
+        ease: "power1.out",
+        scrollTrigger: { trigger: focus[0], start: "top 94%", end: "top 54%", scrub },
+      },
+    );
+  }
 };
 
-/* Track record: the rail draws down with your scroll; each role rises in and
-   its marker ignites as it arrives. */
+/* Experience: the rail draws down with your scroll and each responsibility
+   lights as it passes. */
 export const experienceMotion: Build = (root) => {
-  const timeline = root.querySelector<HTMLElement>(".sx-timeline");
-  if (!timeline) return;
-
-  gsap.fromTo(
-    timeline,
-    { "--rail": 0 },
-    {
-      "--rail": 1,
-      ease: "none",
-      scrollTrigger: { trigger: timeline, start: "top 78%", end: "bottom 62%", scrub },
-    },
-  );
-
-  gsap.utils.toArray<HTMLElement>(".sx-role", timeline).forEach((role) => {
+  const timeline = root.querySelector<HTMLElement>(".xp-timeline");
+  if (timeline) {
     gsap.fromTo(
-      role,
-      { y: 36, opacity: 0.15, "--lit": 0 },
+      timeline,
+      { "--rail": 0 },
       {
-        y: 0,
-        opacity: 1,
-        "--lit": 1,
-        ease: "power2.out",
-        scrollTrigger: { trigger: role, start: "top 88%", end: "top 58%", scrub },
+        "--rail": 1,
+        ease: "none",
+        scrollTrigger: { trigger: timeline, start: "top 72%", end: "bottom 60%", scrub },
       },
     );
+  }
+
+  const list = root.querySelector<HTMLElement>(".xp-points");
+  const points = gsap.utils.toArray<HTMLElement>(".xp-point", root);
+  if (list && points.length) {
+    gsap.fromTo(
+      points,
+      { "--lit": 0, opacity: 0.4 },
+      {
+        "--lit": 1,
+        opacity: 1,
+        ease: "none",
+        stagger: 0.3,
+        scrollTrigger: { trigger: list, start: "top 82%", end: "bottom 62%", scrub },
+      },
+    );
+  }
+
+  const products = gsap.utils.toArray<HTMLElement>(".xp-products li", root);
+  if (products.length) {
+    gsap.fromTo(
+      products,
+      { opacity: 0, x: 34 },
+      {
+        opacity: 1,
+        x: 0,
+        stagger: 0.12,
+        ease: "power1.out",
+        scrollTrigger: { trigger: products[0], start: "top 96%", end: "top 70%", scrub },
+      },
+    );
+  }
+};
+
+/* Skills: each layer band tips up from the page and slides in from
+   alternating sides, the way the plates separate in the hero. */
+export const skillsMotion: Build = (root, { mobile }) => {
+  gsap.utils.toArray<HTMLElement>(".sk-band", root).forEach((band, i) => {
+    const side = i % 2 ? 1 : -1;
+    gsap.fromTo(
+      band,
+      {
+        rotateX: mobile ? 14 : 30,
+        y: mobile ? 40 : 70,
+        x: side * (mobile ? 12 : 48),
+        opacity: 0.2,
+        transformPerspective: 1200,
+        transformOrigin: "50% 100%",
+      },
+      {
+        rotateX: 0,
+        y: 0,
+        x: 0,
+        opacity: 1,
+        ease: "power2.out",
+        scrollTrigger: { trigger: band, start: "top 100%", end: "top 66%", scrub },
+      },
+    );
+
+    const chips = band.querySelectorAll<HTMLElement>(".chip");
+    if (chips.length) {
+      gsap.fromTo(
+        chips,
+        { opacity: 0.2, y: 10 },
+        {
+          opacity: 1,
+          y: 0,
+          stagger: 0.04,
+          ease: "none",
+          scrollTrigger: { trigger: band, start: "top 92%", end: "top 58%", scrub },
+        },
+      );
+    }
+
+    const glyph = band.querySelector<HTMLElement>(".fp");
+    if (glyph) {
+      gsap.fromTo(
+        glyph,
+        { "--gap": "2px" },
+        { "--gap": "8px", ease: "none", scrollTrigger: { trigger: band, start: "top 90%", end: "top 55%", scrub } },
+      );
+    }
   });
+};
+
+/* Projects: cards rise out of the page, column by column. The transform goes
+   on the cell's body (the cell itself holds the anchor id and never moves)
+   and the fade on the glass card itself (rule 1 above). */
+export const projectsMotion: Build = (root, { mobile }) => {
+  gsap.utils.toArray<HTMLElement>(".pj-cell", root).forEach((cell) => {
+    const column = () => (cell.offsetWidth ? Math.round(cell.offsetLeft / (cell.offsetWidth + 20)) : 0);
+    const body = cell.querySelector<HTMLElement>(".pj-cell__body");
+    const card = cell.querySelector<HTMLElement>(".glass");
+    if (!body) return;
+    const trigger = {
+      trigger: cell,
+      start: () => `top ${100 - column() * 6}%`,
+      end: () => `top ${70 - column() * 6}%`,
+      scrub,
+      invalidateOnRefresh: true,
+    };
+
+    gsap.fromTo(
+      body,
+      { y: mobile ? 50 : 90, rotateX: mobile ? 8 : 16, scale: 0.94, transformPerspective: 1200, transformOrigin: "50% 0%" },
+      { y: 0, rotateX: 0, scale: 1, ease: "power2.out", scrollTrigger: trigger },
+    );
+    if (card) {
+      gsap.fromTo(card, { opacity: 0.15 }, { opacity: 1, ease: "none", scrollTrigger: { ...trigger } });
+    }
+  });
+};
+
+/* Contact: the ways to reach you slide in one after another. */
+export const contactMotion: Build = (root) => {
+  const links = gsap.utils.toArray<HTMLElement>(".ct-links li", root);
+  if (!links.length) return;
+  gsap.fromTo(
+    links,
+    { opacity: 0, x: 30 },
+    {
+      opacity: 1,
+      x: 0,
+      stagger: 0.1,
+      ease: "power1.out",
+      scrollTrigger: { trigger: links[0], start: "top 96%", end: "top 68%", scrub },
+    },
+  );
 };

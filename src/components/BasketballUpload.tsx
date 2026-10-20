@@ -1,3 +1,4 @@
+// File: src/components/BasketballUpload.tsx
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import type {
   ChangeEvent,
@@ -180,7 +181,10 @@ export default function BasketballUpload({
   const phaseRef = useRef<UploadPhase>("idle");
   const fileRef = useRef<File | null>(null);
   const propsRef = useRef({ onUpload, onComplete });
-  propsRef.current = { onUpload, onComplete };
+  // keep the latest callbacks for async handlers, without writing during render
+  useLayoutEffect(() => {
+    propsRef.current = { onUpload, onComplete };
+  });
 
   const go = (p: UploadPhase) => {
     phaseRef.current = p;

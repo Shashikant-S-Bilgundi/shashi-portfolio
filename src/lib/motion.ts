@@ -1,11 +1,13 @@
+// File: src/lib/motion.ts
 import { useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-/* ScrollTrigger is registered once for the whole app. Calling it again is a
-   no-op in GSAP, but keeping it here means every consumer is guaranteed a
-   registered plugin without import-order surprises. */
+/* Registered once for the whole app. */
 gsap.registerPlugin(ScrollTrigger);
+/* Mobile URL bars resize the viewport as you scroll. Re-measuring every
+   trigger for that makes the pinned hero jump, so ignore those resizes. */
+ScrollTrigger.config({ ignoreMobileResize: true });
 
 export { gsap, ScrollTrigger };
 
@@ -16,33 +18,29 @@ export function prefersReducedMotion(): boolean {
   return window.matchMedia(REDUCED_MOTION_QUERY).matches;
 }
 
-/**
- * Breakpoints shared by every matchMedia block so the hero and the sections
- * agree on what "mobile" means.
- */
+/** Shared breakpoints, so the hero, the sections and the 3D stage agree. */
 export const MQ = {
   motion: "(prefers-reduced-motion: no-preference)",
   reduced: REDUCED_MOTION_QUERY,
   desktop: "(min-width: 861px)",
   mobile: "(max-width: 860px)",
+  hover: "(hover: hover) and (pointer: fine)",
 } as const;
 
+export function isCompact(): boolean {
+  if (typeof window === "undefined" || !window.matchMedia) return false;
+  return window.matchMedia(MQ.mobile).matches;
+}
+
 /**
- * Fades + lifts direct children of the returned ref into view as they enter
- * the viewport.
+ * Fades and lifts `[data-reveal]` elements in as they enter the viewport, and
+ * back out if you scroll above them again, so the page reverses naturally.
  *
- * Everything runs through `gsap.context`, so React 19's StrictMode double-mount
- * reverts cleanly instead of stacking duplicate ScrollTriggers.
- *
- * Under reduced motion the elements are simply set to their final state — no
- * triggers are created at all.
+ * Opacity only, never `visibility`: hidden text would be skipped by screen
+ * readers that don't scroll. Under reduced motion nothing is hidden at all.
  */
-export function useReveal<T extends HTMLElement = HTMLDivElement>(
-  selector = "[data-reveal]",
-  options: { y?: number; stagger?: number; start?: string } = {},
-) {
+export function useReveal<T extends HTMLElement = HTMLElement>(selector = "[data-reveal]") {
   const ref = useRef<T>(null);
-  const { y = 26, stagger = 0.08, start = "top 86%" } = options;
 
   useLayoutEffect(() => {
     const root = ref.current;
@@ -50,32 +48,20 @@ export function useReveal<T extends HTMLElement = HTMLDivElement>(
 
     const ctx = gsap.context(() => {
       const targets = gsap.utils.toArray<HTMLElement>(selector, root);
-      if (!targets.length) return;
+      if (!targets.length || prefersReducedMotion()) return;
 
-      if (prefersReducedMotion()) {
-        gsap.set(targets, { opacity: 1, y: 0 });
-        return;
-      }
-
-      gsap.set(targets, { opacity: 0, y });
+      gsap.set(targets, { opacity: 0, y: 22 });
       ScrollTrigger.batch(targets, {
-        start,
-        once: true,
-        batchMax: 4,
+        start: "top 90%",
         onEnter: (batch) =>
-          gsap.to(batch, {
-            opacity: 1,
-            y: 0,
-            duration: 0.72,
-            ease: "power3.out",
-            stagger,
-            overwrite: true,
-          }),
+          gsap.to(batch, { opacity: 1, y: 0, duration: 0.8, ease: "power3.out", stagger: 0.08, overwrite: true }),
+        onLeaveBack: (batch) =>
+          gsap.to(batch, { opacity: 0, y: 22, duration: 0.4, ease: "power2.in", overwrite: true }),
       });
     }, root);
 
     return () => ctx.revert();
-  }, [selector, y, stagger, start]);
+  }, [selector]);
 
   return ref;
 }

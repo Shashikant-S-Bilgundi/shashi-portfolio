@@ -1,0 +1,72 @@
+/* File: src/components/sections/Skills.css */
+.sk-bands {
+  display: grid;
+  gap: 14px;
+}
+
+.sk-band {
+  display: grid;
+  grid-template-columns: minmax(240px, 4fr) minmax(0, 8fr);
+  align-items: center;
+  gap: 20px 40px;
+  padding: clamp(20px, 2.6vw, 28px) clamp(20px, 3vw, 34px);
+  border-radius: var(--r-band);
+  /* `translate`, not `transform`: GSAP owns the band's transform */
+  transition: border-color 0.3s var(--ease), translate 0.4s var(--ease);
+}
+@media (hover: hover) {
+  .sk-band:hover {
+    translate: 0 -3px;
+    border-color: var(--glass-border-hover);
+  }
+  .sk-band:hover .chip {
+    border-color: var(--line-strong);
+    color: var(--vanilla);
+  }
+}
+.sk-band .chip {
+  transition: border-color 0.3s var(--ease), color 0.3s var(--ease);
+}
+
+.sk-band--support {
+  --glass-bg: rgba(40, 43, 74, 0.3);
+}
+.sk-band--break {
+  margin-top: 22px;
+}
+
+.sk-band__label {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.sk-band__label h3 {
+  font-stretch: var(--wide);
+  font-weight: 600;
+  font-size: 1.125rem;
+  letter-spacing: -0.015em;
+}
+.sk-band__label p {
+  max-width: 34ch;
+  margin-top: 4px;
+  font-size: var(--fs-small);
+  color: var(--text-faint);
+}
+.sk-band__spacer {
+  flex: none;
+  width: 54px;
+  display: grid;
+  place-items: center;
+}
+.sk-band__spacer::before {
+  content: "";
+  width: 22px;
+  height: 1px;
+  background: var(--line-strong);
+}
+
+@media (max-width: 860px) {
+  .sk-band {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

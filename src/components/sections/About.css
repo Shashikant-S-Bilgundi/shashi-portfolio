@@ -1,0 +1,86 @@
+/* File: src/components/sections/About.css */
+.ab-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  gap: clamp(40px, 6vw, 96px);
+  align-items: start;
+}
+
+.ab-statement {
+  max-width: 30ch;
+  font-stretch: 112%;
+  font-weight: 500;
+  font-size: clamp(1.5rem, 2.7vw, 2.25rem);
+  line-height: 1.3;
+  letter-spacing: -0.018em;
+  text-wrap: pretty;
+}
+
+.ab-body {
+  display: grid;
+  gap: 20px;
+  max-width: 60ch;
+  margin-top: 40px;
+  color: var(--text-dim);
+}
+
+.ab-panel {
+  padding: clamp(24px, 3vw, 36px);
+  border-radius: var(--r-panel);
+}
+.ab-panel__title {
+  font-stretch: var(--wide);
+  font-weight: 600;
+  font-size: 1.25rem;
+  letter-spacing: -0.015em;
+}
+
+.ab-focus {
+  margin-top: 16px;
+}
+.ab-focus li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--line);
+  font-weight: 500;
+}
+.ab-focus svg {
+  flex: none;
+  width: 20px;
+  height: 20px;
+}
+
+.ab-approach {
+  margin-top: 24px;
+  font-size: var(--fs-small);
+  color: var(--text-dim);
+}
+
+.ab-facts {
+  display: grid;
+  gap: 10px;
+  margin-top: 26px;
+  padding-top: 22px;
+  border-top: 1px solid var(--line-mid);
+}
+.ab-facts > div {
+  display: grid;
+  grid-template-columns: 9.5em minmax(0, 1fr);
+  gap: 12px;
+  font-size: var(--fs-small);
+}
+.ab-facts dt {
+  font-stretch: var(--narrow);
+  color: var(--text-faint);
+}
+.ab-facts dd {
+  font-weight: 600;
+}
+
+@media (max-width: 960px) {
+  .ab-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

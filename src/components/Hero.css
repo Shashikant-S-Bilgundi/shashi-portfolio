@@ -1,0 +1,146 @@
+/* File: src/components/Hero.css */
+.hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 100svh;
+  padding-block: var(--nav-h) 72px;
+  overflow: hidden;
+}
+
+.hero__frame {
+  position: relative;
+  z-index: 1;
+}
+
+/* The copy zooms out from its left edge, where the eye starts reading. */
+.hero__copy {
+  max-width: min(680px, 54%);
+  transform-origin: 0% 55%;
+  will-change: transform, opacity;
+}
+
+.hero__name {
+  margin-left: -0.05em;
+  font-stretch: var(--wide);
+  font-weight: 680;
+  font-size: var(--fs-display);
+  line-height: 0.94;
+  letter-spacing: -0.045em;
+  perspective: 900px;
+}
+.hero__name-line {
+  display: block;
+}
+
+.hero__title {
+  margin-top: 28px;
+  font-size: var(--fs-lede);
+  font-weight: 500;
+}
+
+.hero__typed {
+  margin-top: 8px;
+  min-height: 1.35em;
+  font-stretch: 112%;
+  font-size: var(--fs-h3);
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: -0.015em;
+  color: var(--text-dim);
+}
+.hero__typed-text {
+  color: var(--vanilla);
+}
+
+.hero__lede {
+  max-width: 52ch;
+  margin-top: 22px;
+  color: var(--text-dim);
+}
+
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 36px;
+}
+
+/* ---------- scroll cue ---------- */
+.hero__cue {
+  position: absolute;
+  bottom: 26px;
+  left: 50%;
+  z-index: 1;
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  translate: -50% 0;
+  font-size: var(--fs-meta);
+  font-stretch: var(--narrow);
+  font-weight: 500;
+}
+.hero__cue-line {
+  width: 1px;
+  height: 40px;
+  background: linear-gradient(var(--vanilla), transparent);
+  transform-origin: top;
+  animation: hero-cue 2.4s var(--ease-in-out) infinite;
+}
+@keyframes hero-cue {
+  0% {
+    transform: scaleY(0);
+    opacity: 1;
+  }
+  55% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scaleY(1);
+    opacity: 0;
+  }
+}
+
+/* ---------- phones: the stack sits above, the copy below ---------- */
+@media (max-width: 860px) {
+  .hero {
+    align-items: flex-end;
+    padding-bottom: clamp(56px, 10svh, 96px);
+  }
+  /* a scrim so the copy never sits directly on the plates' line work */
+  .hero::before {
+    content: "";
+    position: absolute;
+    inset: 30% 0 0;
+    background: linear-gradient(rgba(40, 43, 74, 0), rgba(40, 43, 74, 0.88) 34%, var(--indigo) 100%);
+    pointer-events: none;
+  }
+  .hero__copy {
+    max-width: none;
+  }
+  .hero__title {
+    margin-top: 20px;
+  }
+  .hero__typed {
+    min-height: 2.7em; /* reserve two lines so the typing never shifts layout */
+  }
+  .hero__actions {
+    margin-top: 28px;
+  }
+  .hero__cue {
+    display: none;
+  }
+}
+
+@media (max-width: 420px) {
+  .hero__actions > * {
+    flex: 1 1 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__cue {
+    display: none;
+  }
+}

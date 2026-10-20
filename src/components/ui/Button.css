@@ -1,0 +1,64 @@
+/* File: src/components/ui/Button.css */
+/* Look for Animate UI's LiquidButton (src/vendor/animate-ui/…/liquid). The
+   component owns the fill animation through its two CSS variables; this file
+   only decides colours, size and shape. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 0 26px;
+  border: 1px solid var(--vanilla);
+  border-radius: 999px;
+  overflow: hidden;
+  font-size: var(--fs-small);
+  font-stretch: 108%;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn svg {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+
+.btn--primary {
+  --liquid-button-background-color: var(--vanilla);
+  --liquid-button-color: var(--indigo-deep);
+  color: var(--indigo);
+}
+
+.btn--ghost {
+  --liquid-button-background-color: transparent;
+  --liquid-button-color: var(--vanilla);
+  color: var(--vanilla);
+  border-color: var(--line-strong);
+}
+
+/* Hover colours only where hover is real. On touch screens :hover sticks
+   after a tap, which would leave dark text on a still-light button. */
+@media (hover: hover) and (pointer: fine) {
+  .btn--primary:hover {
+    color: var(--vanilla);
+  }
+  .btn--ghost:hover {
+    color: var(--indigo);
+    border-color: var(--vanilla);
+  }
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--vanilla);
+  outline-offset: 4px;
+  border-radius: 999px;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
