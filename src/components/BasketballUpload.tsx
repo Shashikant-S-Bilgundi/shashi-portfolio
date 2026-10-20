@@ -116,10 +116,10 @@ const simulateUpload: UploadHandler = (_file, onProgress) =>
 function Ball() {
   return (
     <svg className="bbu__ball" viewBox="0 0 64 64" aria-hidden="true">
-      <circle cx="32" cy="32" r="30" fill="#c07a48" />
+      <circle cx="32" cy="32" r="30" fill="#eeebda" />
       <ellipse cx="24" cy="20" rx="15" ry="11" fill="#fff" opacity="0.13" />
       <path d="M8 46a30 30 0 0 0 48 0a30 22 0 0 1-48 0z" fill="#000" opacity="0.12" />
-      <g stroke="#3b2c22" strokeWidth="2.2" fill="none">
+      <g stroke="#282b4a" strokeWidth="2.2" fill="none">
         <circle cx="32" cy="32" r="30" />
         <path d="M32 2v60M2 32h60" />
         <path d="M9 11c14 10 14 32 0 42M55 11C41 21 41 43 55 53" />

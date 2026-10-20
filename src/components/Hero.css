@@ -1,62 +1,47 @@
-/* File: src/components/Hero.css */
 .hero {
   position: relative;
+  height: 175svh;
+}
+.hero__sticky {
+  position: sticky;
+  top: 0;
   display: flex;
   align-items: center;
-  min-height: 100svh;
-  padding-block: var(--nav-h) 72px;
-  overflow: hidden;
+  height: 100svh;
+  padding-top: var(--nav-h);
 }
 
-.hero__frame {
-  position: relative;
-  z-index: 1;
-}
-
-/* The copy zooms out from its left edge, where the eye starts reading. */
 .hero__copy {
-  max-width: min(680px, 54%);
-  transform-origin: 0% 55%;
-  will-change: transform, opacity;
+  transform-origin: 0% 50%;
 }
 
-.hero__name {
-  margin-left: -0.05em;
-  font-stretch: var(--wide);
-  font-weight: 680;
-  font-size: var(--fs-display);
-  line-height: 0.94;
-  letter-spacing: -0.045em;
-  perspective: 900px;
+.hero__eyebrow {
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 0.75rem;
 }
-.hero__name-line {
-  display: block;
+.hero__eyebrow span {
+  margin-inline: 6px;
+  opacity: 0.5;
 }
 
 .hero__title {
-  margin-top: 28px;
-  font-size: var(--fs-lede);
-  font-weight: 500;
+  max-width: 14ch;
+  margin-top: 24px;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: var(--fs-display);
+  line-height: 0.98;
+  letter-spacing: -0.045em;
 }
 
-.hero__typed {
-  margin-top: 8px;
-  min-height: 1.35em;
-  font-stretch: 112%;
-  font-size: var(--fs-h3);
-  font-weight: 500;
-  line-height: 1.35;
-  letter-spacing: -0.015em;
-  color: var(--text-dim);
-}
-.hero__typed-text {
-  color: var(--vanilla);
-}
-
-.hero__lede {
+.hero__tagline {
   max-width: 52ch;
-  margin-top: 22px;
-  color: var(--text-dim);
+  margin-top: 28px;
+  color: var(--muted);
+  font-size: var(--fs-lede);
+  line-height: 1.6;
 }
 
 .hero__actions {
@@ -66,81 +51,77 @@
   margin-top: 36px;
 }
 
-/* ---------- scroll cue ---------- */
+.hero__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 26px;
+  margin-top: 44px;
+  color: var(--faint);
+}
+.hero__meta li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.hero__meta li::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border: 1px solid currentColor;
+  transform: rotate(45deg);
+}
+
 .hero__cue {
   position: absolute;
-  bottom: 26px;
+  bottom: 28px;
   left: 50%;
-  z-index: 1;
-  display: grid;
-  justify-items: center;
-  gap: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   translate: -50% 0;
-  font-size: var(--fs-meta);
-  font-stretch: var(--narrow);
-  font-weight: 500;
+  color: var(--muted);
 }
-.hero__cue-line {
-  width: 1px;
-  height: 40px;
-  background: linear-gradient(var(--vanilla), transparent);
-  transform-origin: top;
-  animation: hero-cue 2.4s var(--ease-in-out) infinite;
+.hero__cue svg {
+  width: 15px;
+  height: 15px;
+  animation: hero-bob 2s var(--ease-in-out) infinite;
 }
-@keyframes hero-cue {
-  0% {
-    transform: scaleY(0);
-    opacity: 1;
-  }
-  55% {
-    transform: scaleY(1);
-    opacity: 1;
-  }
-  100% {
-    transform: scaleY(1);
-    opacity: 0;
+@keyframes hero-bob {
+  50% {
+    transform: translateY(4px);
   }
 }
 
-/* ---------- phones: the stack sits above, the copy below ---------- */
 @media (max-width: 860px) {
   .hero {
+    height: auto;
+  }
+  .hero__sticky {
+    position: relative;
+    min-height: 100svh;
+    height: auto;
     align-items: flex-end;
-    padding-bottom: clamp(56px, 10svh, 96px);
-  }
-  /* a scrim so the copy never sits directly on the plates' line work */
-  .hero::before {
-    content: "";
-    position: absolute;
-    inset: 30% 0 0;
-    background: linear-gradient(rgba(40, 43, 74, 0), rgba(40, 43, 74, 0.88) 34%, var(--indigo) 100%);
-    pointer-events: none;
-  }
-  .hero__copy {
-    max-width: none;
+    padding-bottom: 72px;
   }
   .hero__title {
-    margin-top: 20px;
-  }
-  .hero__typed {
-    min-height: 2.7em; /* reserve two lines so the typing never shifts layout */
-  }
-  .hero__actions {
-    margin-top: 28px;
+    max-width: none;
   }
   .hero__cue {
     display: none;
   }
 }
-
 @media (max-width: 420px) {
   .hero__actions > * {
     flex: 1 1 100%;
   }
 }
-
 @media (prefers-reduced-motion: reduce) {
-  .hero__cue {
-    display: none;
+  .hero {
+    height: auto;
+  }
+  .hero__sticky {
+    position: relative;
+    min-height: 100svh;
+    height: auto;
   }
 }

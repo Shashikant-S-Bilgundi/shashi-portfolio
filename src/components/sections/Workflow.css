@@ -1,0 +1,85 @@
+.wf-track {
+  --draw: 1;
+  position: relative;
+}
+.wf-path {
+  --draw: 1;
+  position: absolute;
+  top: 27px;
+  left: 28px;
+  right: 28px;
+  height: 1px;
+  background: var(--line);
+}
+.wf-path::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--paper);
+  transform-origin: left;
+  transform: scaleX(var(--draw));
+}
+
+.wf-steps {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 20px;
+}
+.wf-dot {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--paper);
+  transition: background-color 0.4s var(--ease), color 0.4s var(--ease);
+}
+.wf-step:hover .wf-dot {
+  background: var(--paper);
+  color: var(--ink);
+}
+.wf-step h3 {
+  margin-top: 26px;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 1.375rem;
+  letter-spacing: -0.02em;
+}
+.wf-step p {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: var(--fs-small);
+}
+
+@media (max-width: 960px) {
+  .wf-path {
+    top: 28px;
+    bottom: 28px;
+    left: 27px;
+    right: auto;
+    width: 1px;
+    height: auto;
+  }
+  .wf-path::after {
+    transform-origin: top;
+    transform: scaleY(var(--draw));
+  }
+  .wf-steps {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+  .wf-step {
+    display: grid;
+    grid-template-columns: 56px 1fr;
+    column-gap: 20px;
+  }
+  .wf-dot {
+    grid-row: span 2;
+  }
+  .wf-step h3 {
+    margin-top: 12px;
+  }
+}

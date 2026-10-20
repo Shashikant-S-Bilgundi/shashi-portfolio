@@ -1,91 +1,89 @@
-// File: src/components/sections/Experience.tsx
-import { useRef } from "react";
+import { useLayoutEffect, useRef } from "react";
 import { ArrowUpRight, MapPin } from "lucide-react";
-import { experienceMotion, useSectionMotion } from "../../lib/sectionMotion";
+import { MQ, gsap, useReveal } from "../../lib/motion";
 import { experience, projects } from "../../content/portfolio";
+import { SectionHead } from "../ui/SectionHead";
 import "./Experience.css";
 
-const bySlug = new Map(projects.map((p) => [p.slug, p]));
-
 export default function Experience() {
-  const ref = useRef<HTMLElement>(null);
-  useSectionMotion(ref, experienceMotion);
+  const ref = useReveal<HTMLElement>();
+  const fill = useRef<HTMLSpanElement>(null);
+
+  // the timeline's indicator fills as you read down it
+  useLayoutEffect(() => {
+    const mm = gsap.matchMedia();
+    mm.add(MQ.motion, () => {
+      gsap.fromTo(
+        fill.current,
+        { scaleY: 0 },
+        { scaleY: 1, ease: "none", scrollTrigger: { trigger: ".xp-list", start: "top 70%", end: "bottom 60%", scrub: 0.6 } },
+      );
+    });
+    return () => mm.revert();
+  }, []);
 
   return (
     <section ref={ref} id="experience" className="section xp" aria-labelledby="experience-title">
-      <div className="section__frame shell">
-        <header className="section__head">
-          <h2 id="experience-title" className="h2" data-unmask>
-            Experience
-          </h2>
-        </header>
+      <div className="shell">
+        <SectionHead num="06" label="Experience" id="experience-title" title="Where I've shipped" />
 
-        <ol className="xp-timeline">
-          {experience.map((role) => (
-            <li key={`${role.company}-${role.title}`} className="xp-role">
-              <span className="xp-node" aria-hidden="true" />
-              <article className="xp-card glass" data-depth>
-                <header className="xp-card__head">
-                  <div>
-                    <h3 className="xp-title">{role.title}</h3>
-                    <p className="xp-company">{role.company}</p>
-                  </div>
-                  <p className="xp-meta">
-                    {role.period && <span className="xp-period">{role.period}</span>}
-                    <span className="xp-location">
+        <div className="xp-timeline">
+          <span className="xp-line" aria-hidden="true">
+            <span ref={fill} />
+          </span>
+          <ol className="xp-list">
+            {experience.map((role) => {
+              const built = role.projects
+                .map((slug) => projects.find((p) => p.slug === slug))
+                .filter((p) => p !== undefined);
+              return (
+                <li key={role.company} className="xp-role">
+                  <span className="xp-node" aria-hidden="true" />
+                  <div className="xp-meta" data-reveal>
+                    <h3 className="xp-company">{role.company}</h3>
+                    <p className="xp-title">{role.title}</p>
+                    {role.period && <p className="xp-period mono">{role.period}</p>}
+                    <p className="xp-loc">
                       <MapPin aria-hidden="true" strokeWidth={1.6} />
                       {role.location}
-                    </span>
-                  </p>
-                </header>
+                    </p>
+                  </div>
 
-                <ul className="xp-points">
-                  {role.points.map((point, i) => (
-                    <li key={i} className="xp-point">
-                      {point}
-                    </li>
-                  ))}
-                </ul>
-
-                <div className="xp-blocks">
-                  <div className="xp-block">
-                    <h4>Technologies</h4>
-                    <ul className="chip-list" data-stagger>
+                  <div className="xp-detail glass" data-reveal>
+                    <ul className="xp-points">
+                      {role.points.map((pt) => (
+                        <li key={pt}>{pt}</li>
+                      ))}
+                    </ul>
+                    <h4 className="mono">Stack in production</h4>
+                    <ul className="chip-list">
                       {role.stack.map((t) => (
                         <li key={t} className="chip">
                           {t}
                         </li>
                       ))}
                     </ul>
-                  </div>
-
-                  {role.projects.length > 0 && (
-                    <div className="xp-block">
-                      <h4>Products I built here</h4>
-                      <ul className="xp-products">
-                        {role.projects.map((slug) => {
-                          const p = bySlug.get(slug);
-                          if (!p) return null;
-                          return (
-                            <li key={slug}>
-                              <a href={`#project-${slug}`}>
-                                <span>
-                                  <strong>{p.name}</strong>
-                                  <small>{p.tagline}</small>
-                                </span>
-                                <ArrowUpRight aria-hidden="true" strokeWidth={1.6} className="xp-products__arrow" />
+                    {built.length > 0 && (
+                      <>
+                        <h4 className="mono">Products built here</h4>
+                        <ul className="xp-products">
+                          {built.map((p) => (
+                            <li key={p.slug}>
+                              <a href={`#project-${p.slug}`}>
+                                {p.name}
+                                <ArrowUpRight aria-hidden="true" strokeWidth={1.6} />
                               </a>
                             </li>
-                          );
-                        })}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              </article>
-            </li>
-          ))}
-        </ol>
+                          ))}
+                        </ul>
+                      </>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
+        </div>
       </div>
     </section>
   );

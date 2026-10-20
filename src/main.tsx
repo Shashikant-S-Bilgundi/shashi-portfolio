@@ -1,7 +1,8 @@
 // File: src/main.tsx
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import "@fontsource-variable/mona-sans/standard.css";
+import "@fontsource-variable/manrope";
+import "@fontsource-variable/space-grotesk";
 import "./index.css";
 import App from "./App.tsx";
 

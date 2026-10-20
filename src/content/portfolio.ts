@@ -1,4 +1,11 @@
 // File: src/content/portfolio.ts
+import pmShot from "../assets/projects/skyup-pm.webp";
+import crmShot from "../assets/projects/skyup-crm.webp";
+import cabsShot from "../assets/projects/abhicabs.webp";
+import trackerShot from "../assets/projects/skyup-tracker.webp";
+import gruhakalpaShot from "../assets/projects/gruhakalpa.webp";
+import portrait from "../assets/profile.webp";
+
 /**
  * Every word on the page lives here, so copy edits never touch a component.
  *
@@ -10,7 +17,13 @@
  *     • contact.socials[].href (LinkedIn, GitHub, X)
  *     • experience[].period    (e.g. "Jan 2023 – Present")
  *     • projects[].liveUrl / githubUrl / caseStudyUrl
- *     • projects[].previewImage (optional local screenshot, see below)
+ *     • contact.formEndpoint   (form service URL; see Contact below)
+ *
+ * Case-study fields are optional. Fill only what is true; empty fields are
+ * not shown. Never add metrics you can't back up.
+ *
+ * Screenshots must not show real people's names, contact details or
+ * personal activity: blur or crop before adding one.
  */
 
 /* -------------------------------------------------------------------------- */
@@ -51,16 +64,23 @@ export interface Project extends ProjectLinks {
   highlights: string[];
   /** Tech badges, most distinctive first. Also decides which layers light up. */
   stack: string[];
-  /**
-   * Optional screenshot for the live-site hover preview, e.g.
-   *   import pmShot from "../assets/projects/skyup-pm.webp";
-   *   previewImage: pmShot,
-   * Without one, the preview is fetched from microlink.io on hover-capable
-   * devices only.
-   */
-  previewImage?: string;
+  /** Optional screenshot (import it above). Projects without one show no image. */
+  screenshot?: { src: string; alt: string; width: number; height: number };
   /** Renders as the large architecture panel at the top of the section. */
   featured?: boolean;
+  /** Short category label, e.g. "CRM platform". */
+  category?: string;
+  /** Present for projects told as full case studies. */
+  caseStudy?: CaseStudy;
+}
+
+export interface CaseStudy {
+  problem?: string;
+  role?: string;
+  architecture?: string[];
+  decisions?: string[];
+  /** Verified, qualitative outcomes only. */
+  outcomes?: string[];
 }
 
 export interface SkillGroup {
@@ -98,6 +118,16 @@ export const profile = {
   lastName: "Bilgundi",
   initials: "SB",
   title: "Full stack developer in Bengaluru, India",
+  eyebrow: "Full-stack developer · Bengaluru",
+  headline: "I engineer digital products that move businesses forward.",
+  tagline:
+    "Full-stack web applications, business platforms and integrations that turn complex requirements into practical software, from schema to deployment.",
+  meta: ["MERN stack development", "SaaS & business applications", "APIs & integrations"],
+  /** TODO: put your resume in public/ and set "/resume.pdf". Empty hides every resume link. */
+  resumeUrl: "/resume.pdf",
+  photo: { src: portrait, alt: "Shashikant Bilgundi" },
+  /** Shown in the nav. Set to "" when you're not taking work. */
+  availability: "Open to roles & freelance",
   /** The rotating end of the "I build …" line in the hero. */
   builds: [
     "CRM platforms",
@@ -109,8 +139,8 @@ export const profile = {
   intro:
     "I work across the whole stack, from database schema and APIs to the interface and the servers it runs on, building scalable web applications, CRM systems, project management platforms and modern web experiences.",
   location: "Bengaluru, India",
-  ctaPrimary: { label: "View My Projects", href: "#projects" },
-  ctaSecondary: { label: "Let's Connect", href: "#contact" },
+  ctaPrimary: { label: "Explore my work", href: "#projects" },
+  ctaSecondary: { label: "Let's build something", href: "#contact" },
 } as const;
 
 export const layers: Layer[] = [
@@ -125,7 +155,7 @@ export const layers: Layer[] = [
 /* -------------------------------------------------------------------------- */
 
 export const about = {
-  heading: "About me",
+  heading: "Beyond writing code. Building complete systems.",
   /** Rendered large, and lit word by word as you scroll. */
   statement:
     "I'm a full stack developer based in Bengaluru, working across the whole life of a product: schema design and API architecture, the interface people actually touch, and the infrastructure it runs on.",
@@ -245,7 +275,25 @@ export const projects: Project[] = [
     ],
     stack: ["React", "Node.js", "MongoDB", "Cloudflare Pages", "Render", "Telegram"],
     liveUrl: "https://skyupprojectmanagement.com",
+    screenshot: { src: pmShot, alt: "SkyUp Project Management productivity dashboard: team totals and per-employee productivity split, names blurred", width: 1600, height: 720 },
     featured: true,
+    category: "Project management platform",
+    caseStudy: {
+      problem:
+        "A team's projects, attendance, communication and productivity lived in separate places, with no single view of who was working on what.",
+      role: "Sole or primary developer: schema and API design, the React frontend, deployment and operations.",
+      architecture: [
+        "React frontend on Cloudflare Pages, Node.js API on Render, MongoDB",
+        "Biometric attendance devices push records to the API over ADMS",
+        "Per-employee productivity digests broadcast to Telegram",
+      ],
+      decisions: [
+        "Attendance comes from the devices themselves, with clock-in gated on work-from-home days",
+        "Task templates are phase-gated so work follows the team's real process, with CSV import",
+        "Mail and chat live inside the app, next to the work they're about",
+      ],
+      outcomes: ["Live in production"],
+    },
   },
   {
     slug: "skyup-crm",
@@ -259,6 +307,20 @@ export const projects: Project[] = [
       "Traced slow paths to an unindexed duplicate-guard scan and serial outbound sends, both since reworked",
     ],
     stack: ["React", "Node.js", "MongoDB", "AES-256-GCM", "JWT"],
+    liveUrl: "https://skyupcrm.com",
+    screenshot: { src: crmShot, alt: "SkyUp CRM dashboard: lead totals, hot and warm leads, phone and email reveal counts, and pipeline status", width: 1600, height: 727 },
+    category: "CRM platform",
+    caseStudy: {
+      problem:
+        "A multi-tenant CRM holds other businesses' customer data, so tenants must stay apart and lead details stay protected, even from the CRM's own users.",
+      role: "Sole or primary developer across schema, API, frontend and deployment.",
+      architecture: ["React frontend, Node.js API, MongoDB", "JWT authentication with strict per-tenant isolation"],
+      decisions: [
+        "Lead details are masked on the server; revealing one goes through an audited endpoint",
+        "Sensitive fields are encrypted at rest with AES-256-GCM",
+      ],
+      outcomes: ["Traced slow paths to an unindexed duplicate-guard scan and serial outbound sends, both since reworked"],
+    },
   },
   {
     slug: "skyup-tracker",
@@ -272,6 +334,7 @@ export const projects: Project[] = [
       "Auto-update through GitHub Releases, shipped across versions 0.4 to 0.7",
     ],
     stack: ["Electron", "Node.js", "Cloudinary", "GitHub Releases"],
+    screenshot: { src: trackerShot, alt: "Tracked-day summary from SkyUp Tracker: first and last activity, total and idle time, and productivity split", width: 1600, height: 617 },
   },
   {
     slug: "abhicabs",
@@ -285,6 +348,23 @@ export const projects: Project[] = [
       "Rider app covering auth and the full booking flow",
     ],
     stack: ["React Native (Expo)", "Node.js", "PostgreSQL", "Prisma", "Redis"],
+    liveUrl: "https://abhicabs24x7.com",
+    screenshot: { src: cabsShot, alt: "ABHICABS booking site: one-way, round-trip, local and airport booking form", width: 1600, height: 895 },
+    category: "Booking & transport system",
+    caseStudy: {
+      problem: "A cab service needs bookings and fares that stay correct under retries, cancellations and concurrent requests.",
+      role: "Built the backend and the rider app.",
+      architecture: [
+        "React Native (Expo) rider app",
+        "Node.js API with Prisma over a 21-table PostgreSQL schema",
+        "Redis for OTPs, caching and role checks",
+      ],
+      decisions: [
+        "Booking requests are idempotent, so a retry never creates a second ride",
+        "Every booking moves through an explicit lifecycle state machine",
+        "Fares come from a dedicated engine on the server, never the device",
+      ],
+    },
   },
   {
     slug: "gruhakalpa",
@@ -299,6 +379,8 @@ export const projects: Project[] = [
       "WhatsApp payment reminders",
     ],
     stack: ["MERN stack", "MongoDB Atlas", "Cloudinary", "MSG91"],
+    liveUrl: "https://gruhakalpa-frontend.pages.dev",
+    screenshot: { src: gruhakalpaShot, alt: "Gruhakalpa admin dashboard: member, booking and receipt totals and upcoming payments, member names blurred", width: 1600, height: 911 },
   },
   {
     slug: "print-design-editor",
@@ -375,6 +457,63 @@ export function layersFor(stack: string[]): LayerId[] {
   return layers.map((l) => l.id).filter((id) => hit.has(id));
 }
 
+/* -------------------------------------------------------------------------- */
+/* Expertise                                                                   */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Only work the projects show. Left out until done for real: subscription
+ * and payment workflows, payment gateways, AI features.
+ */
+export const expertise = [
+  {
+    icon: "layout",
+    title: "Full-stack web applications",
+    items: ["React interfaces", "Node.js and Express APIs", "JWT auth and role-based access", "Responsive, reusable components"],
+  },
+  {
+    icon: "briefcase",
+    title: "SaaS & business platforms",
+    items: ["CRM systems", "Project management and attendance", "Admin and employee dashboards", "Booking engines"],
+  },
+  {
+    icon: "database",
+    title: "Backend & data engineering",
+    items: ["REST API design", "MongoDB, PostgreSQL, MySQL", "Modelling and query optimisation", "Redis caching", "Encryption and tenant isolation"],
+  },
+  {
+    icon: "plug",
+    title: "Integrations & deployment",
+    items: ["WhatsApp, Telegram and email", "Biometric devices (ADMS)", "Cloudinary storage", "Hetzner, Cloudflare, Render", "Electron auto-updates"],
+  },
+] as const;
+
+/* -------------------------------------------------------------------------- */
+/* Workflow                                                                    */
+/* -------------------------------------------------------------------------- */
+
+export const workflow = [
+  { title: "Understand", text: "Clarify requirements, users, constraints and business goals." },
+  { title: "Architect", text: "Design component boundaries, APIs, data models and authorization." },
+  { title: "Build", text: "Implement interfaces, backend logic, integrations and validation." },
+  { title: "Verify", text: "Test critical flows, permissions, error handling and performance." },
+  { title: "Deliver", text: "Deploy, document, monitor and improve the application." },
+];
+
+/* -------------------------------------------------------------------------- */
+/* Achievements                                                                */
+/* -------------------------------------------------------------------------- */
+
+/** Specific accomplishments, each tied to the project that backs it. No counters. */
+export const achievements = [
+  { title: "Biometric attendance in production", basis: "ADMS push integration from attendance devices into a live platform.", project: "skyup-project-management" },
+  { title: "Customer data protected by design", basis: "Server-side masking, audited reveal endpoints and AES-256-GCM at rest.", project: "skyup-crm" },
+  { title: "Bookings that can't duplicate", basis: "Idempotent requests and a lifecycle state machine over a 21-table schema.", project: "abhicabs" },
+  { title: "A desktop app that updates itself", basis: "Electron auto-updates through GitHub Releases, shipped from v0.4 to v0.7.", project: "skyup-tracker" },
+  { title: "Host migration, backend untouched", basis: "Moved a frontend off a suspended host to Cloudflare Workers with no backend downtime.", project: "salary-payslip" },
+  { title: "Real performance problems, diagnosed", basis: "Traced CRM slow paths to an unindexed scan and serial outbound sends.", project: "skyup-crm" },
+];
+
 /** Rendered as the live, playable demo inside the Projects section. */
 export const featuredDemo = {
   name: "Basketball Upload",
@@ -389,8 +528,17 @@ export const featuredDemo = {
 /* -------------------------------------------------------------------------- */
 
 export const contact = {
-  heading: "Let's build something",
-  blurb: "Open to full stack roles, product work and freelance builds. Email is the quickest way to reach me.",
+  heading: "Have a complex idea? Let's engineer it.",
+  blurb:
+    "Building a product, improving an existing platform, or looking for a developer who turns requirements into reliable software? Let's talk.",
+  /**
+   * TODO: a form service URL that accepts a JSON POST and answers 2xx on
+   * success (e.g. https://formspree.io/f/xxxx). With it the form really
+   * sends; without it, but with an email, it opens the visitor's mail app.
+   * No secrets here: this file ships to the browser.
+   */
+  formEndpoint: "",
+  projectTypes: ["New product / MVP", "Business platform", "Improve an existing app", "API or integration", "Full-time role", "Something else"],
   /** TODO: your real address. The contact form only appears once this is set. */
   email: "",
   /** TODO: optional. Leave empty to hide. */
@@ -408,10 +556,9 @@ export const contact = {
 
 /** Order matches the order of the sections on the page. */
 export const nav = [
-  { label: "Home", href: "#home" },
-  { label: "About Me", href: "#about" },
-  { label: "Experience", href: "#experience" },
-  { label: "Skills", href: "#skills" },
+  { label: "About", href: "#about" },
+  { label: "Expertise", href: "#expertise" },
   { label: "Projects", href: "#projects" },
+  { label: "Experience", href: "#experience" },
   { label: "Contact", href: "#contact" },
 ] as const;

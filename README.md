@@ -1,8 +1,9 @@
 <!-- File: README.md -->
 # Shashikant Bilgundi, Full Stack Developer
 
-Personal portfolio. React 19, TypeScript and Vite, with a Three.js hero, GSAP ScrollTrigger for scroll-driven
-motion, Motion for UI transitions and a handful of Animate UI primitives.
+Personal portfolio, "Digital Architect": one continuous camera journey through a 3D architectural scene.
+React 19, TypeScript, Vite, Three.js with React Three Fiber, GSAP ScrollTrigger for scroll choreography, Motion for
+interface transitions. Two colours: Midnight Indigo `#282b4a` and Vanilla `#eeebda`.
 
 ```bash
 npm install
@@ -10,69 +11,50 @@ npm run dev       # local dev server
 npm run build     # type-check + production build into dist/
 npm run preview   # serve the production build
 npm run lint
-npm i --no-save jsdom esbuild && npm run smoke   # jsdom smoke test (75 checks)
+npm i --no-save jsdom esbuild && npm run smoke   # jsdom smoke test (74 checks)
 ```
 
 ## Editing content
 
-Every word on the page lives in **`src/content/portfolio.ts`**. Components never hold copy.
+Every word on the page lives in **`src/content/portfolio.ts`**. Empty values are simply not rendered, so the live
+site never shows a placeholder or a dead link. Still to fill in:
 
-Fields left as empty strings are not rendered, so the live site never shows a placeholder or a broken link:
+| Field                     | What appears when you fill it in                                         |
+| ------------------------- | ------------------------------------------------------------------------ |
+| `profile.resumeUrl`       | Resume download in the nav, menu and Resume section (put the PDF in `public/`) |
+| `contact.socials[].href`  | GitHub / LinkedIn / X in Resume, Contact and the footer                  |
+| `contact.email`           | Email links, and the contact form (opens the visitor's mail app)        |
+| `contact.formEndpoint`    | The form sends for real (any service accepting a JSON POST, e.g. Formspree) |
+| `experience[].period`     | Dates on the role                                                        |
+| `projects[].githubUrl` …  | Source / case-study buttons on that project                              |
 
-| Field                                  | What happens when you fill it in                                  |
-| -------------------------------------- | ----------------------------------------------------------------- |
-| `contact.email`                        | Email row appears and the contact form switches on                |
-| `contact.phone`                        | Phone row appears                                                 |
-| `contact.socials[].href`               | LinkedIn / GitHub / X rows appear                                 |
-| `experience[].period`                  | Dates appear on the role                                          |
-| `projects[].liveUrl`                   | "Live site" action, with a hover preview on desktop               |
-| `projects[].githubUrl`                 | "Source code" action                                              |
-| `projects[].caseStudyUrl`              | "Case study" action                                               |
-| `projects[].previewImage`              | Your own screenshot for the hover preview instead of a remote one |
-
-Each project card shows which layers of the stack it touches. That is computed from the project's own `stack`
-array through the `techLayer` table, so adding a technology there is all it takes to light a layer.
+Case studies (`projects[].caseStudy`) take only what is true: problem, role, architecture, decisions, outcomes.
+Missing fields are skipped. Add a real-estate or any other case study the same way.
 
 ## How it is put together
 
 ```
 src/
-  content/portfolio.ts      all copy and data
-  lib/
-    motion.ts               GSAP registration, breakpoints, useReveal
-    sectionMotion.ts        the shared scroll vocabulary (depth, unmask, stagger, recede)
-    stack.ts                the 3D stack's choreography as a pure function of scroll
+  content/portfolio.ts        all copy and data
+  lib/journey.ts              camera keyframes per section, poseAt(scroll): the whole choreography
+  lib/motion.ts               GSAP registration, breakpoints, useReveal
   components/
-    Hero.tsx                pinned hero; reports scroll progress to the stack
-    SiteNav.tsx             fixed nav, active-section pill, mobile menu
-    stack/StackScene.ts     the Three.js scene (lazy chunk)
-    stack/StackStage.tsx    fixed stage, WebGL detection, CSS fallback
-    sections/…              About, Experience, Skills, Contact, footer
-    projects/…              featured panel, cards, actions, preview card
-    BasketballUpload.tsx    the original physics uploader, kept as an interactive demo
-  vendor/animate-ui/        vendored Animate UI primitives (see its README)
+    scene/SceneStage.tsx      fixed stage: WebGL check, lazy scene, scroll scrub, fallback drawing
+    scene/JourneyScene.tsx    the R3F scene: layer plates, portals, columns, floor (lazy chunk)
+    SiteNav.tsx, Hero.tsx
+    sections/…                About, Expertise, Skills, Workflow, Experience, Achievements, Resume, Contact, footer
+    projects/…                case studies with approaching mockups, project index, playable demo
+    ui/…                      RevealText (masked words), TiltCard (glass hover), SectionHead
 ```
 
-**Scroll choreography.** ScrollTrigger never tweens the 3D scene. It records three progress values (through the
-hero, through the page, through Contact) and `stackTargets()` turns them into the scene's pose. Because the pose
-is a function of scroll position, scrolling up reverses it exactly. The scene eases toward that pose every frame.
+**One camera, driven by scroll.** Each section has a keyframe in `lib/journey.ts` (camera, target, layout of the four
+layer plates, spin, presence). GSAP scrubs a smoothed copy of the scroll position; the scene computes its pose from
+it every frame. Nothing accumulates, so scrolling back, resizing, refreshing or deep-linking always gives the right
+pose. Anchors are re-measured on every ScrollTrigger refresh and when content changes height.
 
-**Glass and motion.** Glass panels blur the 3D scene behind the page. Opacity, filter or clip-path on any
-*ancestor* of a glass panel would stop that, so section motion only ever transforms ancestors and fades panels
-themselves. The rule is written at the top of `sectionMotion.ts`.
+**Performance.** three.js and R3F are a separate chunk loaded after first paint. The scene renders on demand (only
+while scroll, pointer or the intro is moving), caps pixel ratio, uses instanced columns and one shared plate
+geometry, and drops antialiasing and half the columns on tablets, phones and low-core devices.
 
-**Performance.** three.js is a separate chunk loaded after first paint. The scene renders on demand and stops
-when nothing is moving, caps the pixel ratio, and drops the idle float and particles on phones, low-core and
-Save-Data devices. It disposes every GPU resource on unmount. The preview card (Radix, Floating UI) is its own
-chunk, loaded only on hover-capable devices near the Projects section.
-
-**Accessibility and fallbacks.** Reduced motion gives a static page: no pin, no scrubbing, everything visible.
-Without WebGL a CSS version of the stack follows the same choreography. Keyboard focus is always visible, the
-mobile menu closes on Escape and makes the page behind it inert, and hover-only effects are limited to devices
-that can hover.
-
-## Animate UI
-
-Liquid Button, Splitting Text, Typing Text, Shimmering Text, Tilt and Preview Link Card are copied from Animate
-UI's source into `src/vendor/animate-ui/` rather than installed, because `@animate-ui/react` was first published
-the day before this build. Their APIs are identical to the package, and the folder's README explains how to switch.
+**Fallbacks.** No WebGL: a static drawing of the structure. Reduced motion: the scene holds its opening pose, the hero
+is one screen tall, and every animation is off. Phones: the hero is one screen, nothing is pinned anywhere.

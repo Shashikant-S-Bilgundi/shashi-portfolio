@@ -1,0 +1,47 @@
+.stage {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: var(--ink);
+}
+.stage canvas {
+  display: block;
+  animation: stage-in 1.4s var(--ease) both;
+}
+@keyframes stage-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Keeps the left reading column calm and the edges dark, whatever the camera does. */
+.stage__scrim {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(120% 90% at 70% 45%, transparent 40%, color-mix(in srgb, var(--ink) 70%, transparent) 100%),
+    linear-gradient(90deg, color-mix(in srgb, var(--ink) 55%, transparent), transparent 55%);
+}
+
+.stage__static {
+  position: absolute;
+  top: 50%;
+  right: 6vw;
+  width: min(46vw, 520px);
+  translate: 0 -50%;
+  color: var(--paper);
+  opacity: 0.5;
+}
+
+@media (max-width: 860px) {
+  .stage__scrim {
+    background: color-mix(in srgb, var(--ink) 35%, transparent);
+  }
+  .stage__static {
+    right: 50%;
+    translate: 50% -60%;
+    width: 80vw;
+    opacity: 0.25;
+  }
+}

@@ -1,73 +1,69 @@
-// File: src/components/sections/About.tsx
-import { useRef } from "react";
-import { Database, Layers, MonitorSmartphone, Server, Workflow } from "lucide-react";
-import { aboutMotion, useSectionMotion } from "../../lib/sectionMotion";
-import { about } from "../../content/portfolio";
+import { useReveal } from "../../lib/motion";
+import { setHighlight } from "../../lib/journey";
+import { about, layers, profile } from "../../content/portfolio";
+import { SectionHead } from "../ui/SectionHead";
 import "./About.css";
 
-const ICONS = {
-  server: Server,
-  workflow: Workflow,
-  database: Database,
-  monitor: MonitorSmartphone,
-  layers: Layers,
-} as const;
-
+/**
+ * As this section arrives the camera swings around the structure and its
+ * plates separate into the four layers listed here. Hovering a layer lights
+ * the matching plate in the scene (decorative: the list itself says it all).
+ * The right half of the screen is left open for that view.
+ */
 export default function About() {
-  const ref = useRef<HTMLElement>(null);
-  useSectionMotion(ref, aboutMotion);
+  const ref = useReveal<HTMLElement>();
 
   return (
     <section ref={ref} id="about" className="section ab" aria-labelledby="about-title">
-      <div className="section__frame shell">
-        <header className="section__head">
-          <h2 id="about-title" className="h2" data-unmask>
-            {about.heading}
-          </h2>
-        </header>
+      <div className="shell ab-grid">
+        <div className="ab-main">
+          <SectionHead num="01" label="About" id="about-title" title={about.heading} />
 
-        <div className="ab-grid">
-          <div className="ab-story">
-            {/* word spans let the scroll effect resolve the statement as you read it */}
-            <p className="ab-statement">
-              {about.statement.split(" ").map((word, i) => (
-                <span key={i} className="w">
-                  {word}{" "}
-                </span>
-              ))}
+          <div className="ab-intro">
+            <figure className="ab-photo" data-reveal>
+              <img src={profile.photo.src} alt={profile.photo.alt} width={646} height={692} loading="lazy" decoding="async" />
+            </figure>
+            <p className="ab-statement" data-reveal>
+              {about.statement}
             </p>
-            <div className="ab-body">
-              {about.paragraphs.map((p, i) => (
-                <p key={i}>{p}</p>
-              ))}
-            </div>
+          </div>
+          <div className="ab-body">
+            {about.paragraphs.map((p, i) => (
+              <p key={i} data-reveal>
+                {p}
+              </p>
+            ))}
           </div>
 
-          <aside className="ab-panel glass" data-depth aria-labelledby="focus-title">
-            <h3 id="focus-title" className="ab-panel__title">
-              {about.focusHeading}
-            </h3>
-            <ul className="ab-focus">
-              {about.focus.map((f) => {
-                const Icon = ICONS[f.icon];
-                return (
-                  <li key={f.label}>
-                    <Icon aria-hidden="true" strokeWidth={1.5} />
-                    <span>{f.label}</span>
-                  </li>
-                );
-              })}
-            </ul>
-            <p className="ab-approach">{about.approach}</p>
-            <dl className="ab-facts">
-              {about.facts.map((f) => (
-                <div key={f.label}>
-                  <dt>{f.label}</dt>
-                  <dd>{f.value}</dd>
-                </div>
+          <figure className="ab-map glass" data-reveal>
+            <figcaption className="mono">How I see a system, top to bottom</figcaption>
+            <ol>
+              {layers.map((l, i) => (
+                <li
+                  key={l.id}
+                  onPointerEnter={() => setHighlight(i)}
+                  onPointerLeave={() => setHighlight(-1)}
+                >
+                  <span className="mono">L{layers.length - i}</span>
+                  <strong>{l.name}</strong>
+                  <span className="ab-map__ex">{l.examples}</span>
+                </li>
               ))}
-            </dl>
-          </aside>
+            </ol>
+          </figure>
+
+          <blockquote className="ab-approach" data-reveal>
+            <p>{about.approach}</p>
+          </blockquote>
+
+          <dl className="ab-facts" data-reveal>
+            {about.facts.map((f) => (
+              <div key={f.label}>
+                <dt className="mono">{f.label}</dt>
+                <dd>{f.value}</dd>
+              </div>
+            ))}
+          </dl>
         </div>
       </div>
     </section>

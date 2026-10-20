@@ -1,0 +1,56 @@
+.ac-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+.ac-grid > li {
+  display: grid;
+}
+.ac-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 28px;
+  transition: border-color 0.4s var(--ease);
+}
+.ac-card:hover {
+  border-color: var(--line-strong);
+}
+.ac-card h3 {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 1.3125rem;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+.ac-card p {
+  color: var(--muted);
+  font-size: var(--fs-small);
+}
+.ac-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: auto;
+  padding-top: 12px;
+  color: var(--paper);
+}
+.ac-link svg {
+  width: 14px;
+  height: 14px;
+  transition: transform 0.3s var(--ease);
+}
+.ac-link:hover svg {
+  transform: translate(2px, -2px);
+}
+
+@media (max-width: 1024px) {
+  .ac-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 640px) {
+  .ac-grid {
+    grid-template-columns: 1fr;
+  }
+}

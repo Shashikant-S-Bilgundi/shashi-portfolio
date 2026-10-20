@@ -1,64 +1,84 @@
-// File: src/components/sections/Skills.tsx
-import { skillsMotion, useSectionMotion } from "../../lib/sectionMotion";
-import { useReveal } from "../../lib/motion";
+import { useRef, useState } from "react";
+import type { KeyboardEvent } from "react";
+import { AnimatePresence, motion } from "motion/react";
 import { skills } from "../../content/portfolio";
-import { LayerFootprint } from "../ui/LayerFootprint";
+import { SectionHead } from "../ui/SectionHead";
 import "./Skills.css";
 
 /**
- * Grouped by layer of the stack rather than by arbitrary category, and
- * without proficiency bars: each band is a plate from the hero, laid flat.
+ * The technology ecosystem: category tabs (arrow keys move between them)
+ * over a grid of labelled tiles. Behind it the scene's modules regroup and
+ * connect, seen from above.
  */
 export default function Skills() {
-  const ref = useReveal<HTMLElement>();
-  useSectionMotion(ref, skillsMotion);
-  const firstSupport = skills.findIndex((g) => !g.layer);
+  const [active, setActive] = useState(0);
+  const tabs = useRef<(HTMLButtonElement | null)[]>([]);
+  const group = skills[active];
+
+  const onKey = (e: KeyboardEvent) => {
+    const step = ({ ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 } as Record<string, number>)[e.key];
+    if (!step) return;
+    e.preventDefault();
+    const next = (active + step + skills.length) % skills.length;
+    setActive(next);
+    tabs.current[next]?.focus();
+  };
 
   return (
-    <section ref={ref} id="skills" className="section sk" aria-labelledby="skills-title">
-      <div className="section__frame shell">
-        <header className="section__head">
-          <h2 id="skills-title" className="h2" data-unmask>
-            Skills
-          </h2>
-          <p className="lede" data-reveal>
-            Grouped by the layer of the stack they belong to, from what people see down to where it runs.
-          </p>
-        </header>
+    <section id="skills" className="section sk" aria-labelledby="skills-title">
+      <div className="shell">
+        <SectionHead num="04" label="Technical stack" id="skills-title" title="A connected ecosystem, not a wall of logos" />
 
-        <ul className="sk-bands">
-          {skills.map((group, i) => (
-            <li
-              key={group.title}
-              className={[
-                "sk-band glass",
-                group.layer ? "" : "sk-band--support",
-                i === firstSupport ? "sk-band--break" : "",
-              ]
-                .filter(Boolean)
-                .join(" ")}
+        <div className="sk-tabs" role="tablist" aria-label="Technology categories" onKeyDown={onKey}>
+          {skills.map((g, i) => (
+            <button
+              key={g.title}
+              ref={(el) => {
+                tabs.current[i] = el;
+              }}
+              type="button"
+              role="tab"
+              id={`sk-tab-${i}`}
+              aria-selected={i === active}
+              aria-controls="sk-panel"
+              tabIndex={i === active ? 0 : -1}
+              className="sk-tab"
+              onClick={() => setActive(i)}
             >
-              <div className="sk-band__label">
-                {group.layer ? (
-                  <LayerFootprint active={[group.layer]} size="sm" />
-                ) : (
-                  <span className="sk-band__spacer" aria-hidden="true" />
-                )}
-                <div>
-                  <h3>{group.title}</h3>
-                  <p>{group.description}</p>
-                </div>
-              </div>
-              <ul className="chip-list sk-band__items" aria-label={`${group.title} skills`}>
-                {group.items.map((item) => (
-                  <li key={item} className="chip">
-                    {item}
-                  </li>
+              {i === active && <motion.span layoutId="sk-pill" className="sk-tab__pill" transition={{ type: "spring", stiffness: 400, damping: 36 }} />}
+              <span className="sk-tab__label">{g.title}</span>
+              <span className="mono sk-tab__count">{g.items.length}</span>
+            </button>
+          ))}
+        </div>
+
+        <div id="sk-panel" className="sk-panel" role="tabpanel" aria-labelledby={`sk-tab-${active}`}>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={active}
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <p className="sk-desc">{group.description}</p>
+              <ul className="sk-tiles">
+                {group.items.map((t, i) => (
+                  <motion.li
+                    key={t}
+                    className="sk-tile glass"
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.03, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+                  >
+                    <span className="mono">{String(i + 1).padStart(2, "0")}</span>
+                    {t}
+                  </motion.li>
                 ))}
               </ul>
-            </li>
-          ))}
-        </ul>
+            </motion.div>
+          </AnimatePresence>
+        </div>
       </div>
     </section>
   );
